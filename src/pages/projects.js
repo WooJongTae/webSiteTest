@@ -1,11 +1,15 @@
 import Layout from "@/components/layout";
 import axios from "axios";
 import { DATABASE_ID, TOKEN } from "../../config/index.js";
+import ProjectItem from "@/components/projects/project-item.js";
 
-export default function Projects() {
+export default function Projects({ infoData }) {
   return (
     <Layout>
-      <h1>프로젝트</h1>
+      <h1>프로젝트{infoData.length}</h1>
+      {infoData.map((aProject) => (
+        <ProjectItem data={aProject} key={aProject.id} />
+      ))}
     </Layout>
   );
 }
@@ -20,16 +24,25 @@ export async function getStaticProps() {
       "content-type": "application/json",
       Authorization: `Bearer ${TOKEN}`,
     },
-    data: { page_size: 100 },
+    data: {
+      page_size: 100,
+      sorts: [
+        {
+          property: "이름",
+          direction: "ascending",
+        },
+      ],
+    },
   };
 
   const response = await axios.request(options);
-  const ProjectsIds = response.data.results.map(
-    (aProject) => aProject.properties.이름.title.plain_text
-  );
-  console.log(ProjectsIds);
+  console.log(response.data.results);
+  // const ProjectsNames = response.data.results.map((aProject) => (
+  //   <ProjectItem data={aProject} key={aProject.id} />
+  // ));
+  const infoData = response.data.results;
 
   return {
-    props: {},
+    props: { infoData },
   };
 }
